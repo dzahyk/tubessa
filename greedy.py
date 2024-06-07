@@ -1,4 +1,18 @@
 import timeit
+import matplotlib.pyplot as plt
+
+# Mendefinisikan nama kota dan koordinat kota (x, y)
+nama_kota = ["Lembang", "Bandung", "Cimahi", "Sumedang", "Soreang", "Banjaran", "Cileunyi", "Majalaya"]
+koordinat_kota = {
+    "Lembang": (10, 60),
+    "Bandung": (20, 50),
+    "Cimahi": (15, 45),
+    "Sumedang": (50, 50),
+    "Soreang": (30, 30),
+    "Banjaran": (35, 25),
+    "Cileunyi": (40, 60),
+    "Majalaya": (45, 40)
+}
 
 # Mencari kota terdekat yang belum dikunjungi
 def kotaTerdekat(kota, jarak, visited):
@@ -20,6 +34,7 @@ def ruteGreedy(distances, bensinAwal):
     fuel = bensinAwal
     costBensin = 0
     hargaperLiter = 10000
+    konsumsiBensinPerKm = 1 / 12
 
     visited[currentCity] = True
 
@@ -27,15 +42,15 @@ def ruteGreedy(distances, bensinAwal):
         nextCity, distance = kotaTerdekat(currentCity, distances, visited)
         if nextCity is None:
             print("Tidak ada kota yang dapat dikunjungi lagi.")
-            return rute, jarakTotal, fuel, costBensin
+            return rute, jarakTotal, fuel, int(costBensin)
         
         rute.append(nextCity)
         jarakTotal += distance
-        fuel -= distance
-        costBensin += distance * hargaperLiter
+        fuel -= distance * konsumsiBensinPerKm
+        costBensin += distance * hargaperLiter * konsumsiBensinPerKm
         if fuel < 0:
             print("Bahan bakar habis sebelum mencapai semua kota.")
-            return rute, jarakTotal, 0, costBensin
+            return rute, jarakTotal, 0, int(costBensin)
         
         visited[nextCity] = True
         currentCity = nextCity
@@ -43,41 +58,74 @@ def ruteGreedy(distances, bensinAwal):
     # Kembali ke kota awal
     jarakTotal += distances[currentCity][0]
     rute.append(0)
-    fuel -= distances[currentCity][0]
-    costBensin += distances[currentCity][0] * hargaperLiter
+    fuel -= distances[currentCity][0] * konsumsiBensinPerKm
+    costBensin += distances[currentCity][0] * hargaperLiter * konsumsiBensinPerKm
     if fuel < 0:
         print("Bahan bakar habis sebelum kembali ke kota awal.")
-        return rute, jarakTotal, 0, costBensin
+        return rute, jarakTotal, 0, int(costBensin)
 
-    return rute, jarakTotal, fuel, costBensin
+    return rute, jarakTotal, fuel, int(costBensin)
 
 # Contoh data jarak antar kota (matriks) yang lebih banyak
 distances = [
-    [0, 13, 11, 39, 29, 32, 27, 35],    # Lembang
-    [13, 0, 10, 32, 18, 22, 15, 25],    # Bandung
-    [11, 10, 0, 38, 18, 21, 17, 27],    # Cimahi
-    [39, 32, 38, 0, 50, 50, 23, 30],    # Sumedang
-    [29, 18, 18, 50, 0, 15, 30, 25],    # Soreang
-    [32, 22, 21, 50, 15, 0, 35, 28],    # Banjaran
-    [27, 15, 17, 23, 30, 35, 0, 10],    # Cileunyi
-    [35, 25, 27, 30, 25, 28, 10, 0]     # Majalaya
+    [0, 14, 20, 56, 32, 32, 27, 42],    # Lembang
+    [14, 0, 13, 46, 18, 20, 18, 26],    # Bandung
+    [20, 13, 0, 58, 22, 28, 30, 35],    # Cimahi
+    [56, 46, 58, 0, 60, 57, 31, 40],    # Sumedang
+    [32, 18, 22, 60, 0, 8, 31, 31],    # Soreang
+    [32, 20, 28, 57, 8, 0, 28, 23],    # Banjaran
+    [27, 18, 30, 31, 31, 28, 0, 19],    # Cileunyi
+    [42, 26, 35, 40, 31, 23, 19, 0]     # Majalaya
 ]
 
 # Nilai awal bahan bakar
-initial_fuel = 1000
+initialFuel = 100
 
-# Membungkus pemanggilan fungsi greedy_route dalam sebuah fungsi
+# Fungsi untuk menjalankan algoritma greedy
 def runGreedyrute():
-    return ruteGreedy(distances, initial_fuel)
+    return ruteGreedy(distances, initialFuel)
 
-# Mengukur waktu eksekusi menggunakan timeit
-execution_time = timeit.timeit(runGreedyrute, number=1)
+executionTime = timeit.timeit(runGreedyrute, number=1)
 
-# Jalankan algoritma greedy
 route, totalDistance, sisaBensin, harga = runGreedyrute()
 
-print("Rute yang diambil:", route)
-print("Jarak total yang ditempuh:", totalDistance)
+route_with_names = [nama_kota[i] for i in route]
+
+print("Rute yang diambil:", route_with_names)
+print("Jarak total yang ditempuh:", totalDistance, "Km")
 print("Sisa bahan bakar:", sisaBensin)
 print("Total biaya bahan bakar:", harga, "rupiah")
-print("Waktu eksekusi: {:.10f} detik".format(execution_time))
+print("Waktu eksekusi: {:.10f} detik".format(executionTime))
+
+# Visualisasi graf rute
+def visualize_route(route, koordinat_kota, nama_kota):
+    fig, ax = plt.subplots()
+    x_coords = [koordinat_kota[nama_kota[i]][0] for i in route]
+    y_coords = [koordinat_kota[nama_kota[i]][1] for i in route]
+    
+    for i in range(len(route) - 1):
+        start = route[i]
+        end = route[i + 1]
+        start_x, start_y = koordinat_kota[nama_kota[start]]
+        end_x, end_y = koordinat_kota[nama_kota[end]]
+        ax.annotate("",
+                    xy=(end_x, end_y), xycoords='data',
+                    xytext=(start_x, start_y), textcoords='data',
+                    arrowprops=dict(arrowstyle="->",
+                                    connectionstyle="arc3"))
+
+    for i, kota in enumerate(route):
+        x, y = koordinat_kota[nama_kota[kota]]
+        ax.annotate(nama_kota[kota], (x, y), textcoords="offset points", xytext=(0,10), ha='center')
+        ax.plot(x, y, 'bo')
+    
+    ax.set_title('Rute yang Diambil')
+    ax.set_xlabel('Koordinat X')
+    ax.set_ylabel('Koordinat Y')
+    plt.grid(True)
+    plt.show()
+
+route_indices = [nama_kota.index(kota) for kota in route_with_names]
+
+# Visualisasikan rute
+visualize_route(route_indices, koordinat_kota, nama_kota)
