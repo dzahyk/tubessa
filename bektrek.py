@@ -2,56 +2,56 @@ import matplotlib.pyplot as plt
 import time
 
 # Fungsi untuk menghitung jarak total dari rute yang diberikan
-def calculate_route_distance(route, distance_matrix):
-    distance = 0
-    for i in range(len(route) - 1):
-        distance += distance_matrix[route[i]][route[i + 1]]
-    distance += distance_matrix[route[-1]][route[0]]  # Kembali ke kota asal
-    return distance
+def hitung_jarak_rute(rute, matriks_jarak):
+    jarak = 0
+    for i in range(len(rute) - 1):
+        jarak += matriks_jarak[rute[i]][rute[i + 1]]
+    jarak += matriks_jarak[rute[-1]][rute[0]]  # Kembali ke kota asal
+    return jarak
 
 # Fungsi untuk mencari rute terpendek dengan backtracking
-def find_shortest_route(distance_matrix):
-    n = len(distance_matrix)
-    shortest_distance = float('inf')
-    shortest_route = None
+def cari_rute_terpendek(matriks_jarak):
+    n = len(matriks_jarak)
+    jarak_terpendek = float('inf')
+    rute_terpendek = None
 
-    def backtrack(curr_route, curr_distance):
-        nonlocal shortest_distance, shortest_route
+    def backtrack(rute_saat_ini, jarak_saat_ini):
+        nonlocal jarak_terpendek, rute_terpendek
 
-        if len(curr_route) == n:
-            curr_distance += distance_matrix[curr_route[-1]][curr_route[0]]  # Kembali ke kota asal
-            if curr_distance < shortest_distance:
-                shortest_distance = curr_distance
-                shortest_route = curr_route[:]
+        if len(rute_saat_ini) == n:
+            jarak_saat_ini += matriks_jarak[rute_saat_ini[-1]][rute_saat_ini[0]]  # Kembali ke kota asal
+            if jarak_saat_ini < jarak_terpendek:
+                jarak_terpendek = jarak_saat_ini
+                rute_terpendek = rute_saat_ini[:]
             return
 
-        for next_city in range(n):
-            if next_city not in curr_route:
-                backtrack(curr_route + [next_city], curr_distance + distance_matrix[curr_route[-1]][next_city])
+        for kota_berikutnya in range(n):
+            if kota_berikutnya not in rute_saat_ini:
+                backtrack(rute_saat_ini + [kota_berikutnya], jarak_saat_ini + matriks_jarak[rute_saat_ini[-1]][kota_berikutnya])
 
     backtrack([0], 0)
-    return shortest_route, shortest_distance
+    return rute_terpendek, jarak_terpendek
 
 # Visualisasi rute terbaik menggunakan matplotlib
-def plot_route(route, cities, coordinates):
-    route_cities = [cities[i] for i in route] + [cities[route[0]]]  # Tambahkan kota awal di akhir rute
-    x_coords = [coordinates[city][0] for city in route_cities]
-    y_coords = [coordinates[city][1] for city in route_cities]
+def plot_rute(rute, kota, koordinat):
+    rute_kota = [kota[i] for i in rute] + [kota[rute[0]]]  # Tambahkan kota awal di akhir rute
+    x_koordinat = [koordinat[city][0] for city in rute_kota]
+    y_koordinat = [koordinat[city][1] for city in rute_kota]
     
     plt.figure(figsize=(10, 6))
-    plt.plot(x_coords, y_coords, marker='o')
-    for i, city in enumerate(route_cities):
-        plt.text(x_coords[i], y_coords[i], city)
+    plt.plot(x_koordinat, y_koordinat, marker='o')
+    for i, city in enumerate(rute_kota):
+        plt.text(x_koordinat[i], y_koordinat[i], city)
 
     # Tambahkan panah untuk menunjukkan arah rute
-    for i in range(len(route_cities) - 1):
+    for i in range(len(rute_kota) - 1):
         plt.annotate(
-            '', xy=(x_coords[i+1], y_coords[i+1]), xytext=(x_coords[i], y_coords[i]),
+            '', xy=(x_koordinat[i+1], y_koordinat[i+1]), xytext=(x_koordinat[i], y_koordinat[i]),
             arrowprops=dict(facecolor='blue', shrink=0.05)
         )
     # Tambahkan panah dari kota terakhir kembali ke kota asal
     plt.annotate(
-        '', xy=(x_coords[0], y_coords[0]), xytext=(x_coords[-1], y_coords[-1]),
+        '', xy=(x_koordinat[0], y_koordinat[0]), xytext=(x_koordinat[-1], y_koordinat[-1]),
         arrowprops=dict(facecolor='blue', shrink=0.05)
     )
 
@@ -62,11 +62,11 @@ def plot_route(route, cities, coordinates):
     plt.show()
 
 # Fungsi untuk menghitung biaya bahan bakar berdasarkan jarak
-def calculate_fuel_cost(distance, fuel_price_per_liter, fuel_efficiency):
-    return (distance / fuel_efficiency) * fuel_price_per_liter
+def hitung_biaya_bahan_bakar(jarak, harga_bahan_bakar_per_liter, efisiensi_bahan_bakar):
+    return (jarak / efisiensi_bahan_bakar) * harga_bahan_bakar_per_liter
 
-# Data jarak antar kota di sekitar Bandung berdasarkan Google Map (distance matrix)
-distance_matrix = [
+# Data jarak antar kota di sekitar Bandung berdasarkan Google Map (matriks jarak)
+matriks_jarak = [
     #   Lembang, Bandung, Cimahi, Sumedang, Soreang, Banjaran, Cileunyi, Majalaya
     [0, 14, 20, 56, 32, 32, 27, 42],    # Lembang
     [14, 0, 13, 46, 18, 20, 18, 26],    # Bandung
@@ -79,7 +79,7 @@ distance_matrix = [
 ]
 
 # Koordinat kota untuk visualisasi (acak untuk tujuan plotting)
-coordinates = {
+koordinat = {
     "Lembang": (10, 60),
     "Bandung": (20, 50),
     "Cimahi": (15, 45),
@@ -91,24 +91,24 @@ coordinates = {
 }
 
 # Mengukur waktu eksekusi
-start_time = time.time()
+waktu_mulai = time.time()
 
 # Memanggil fungsi untuk mencari rute terpendek menggunakan backtracking
-best_route, min_distance = find_shortest_route(distance_matrix)
+rute_terbaik, jarak_terpendek = cari_rute_terpendek(matriks_jarak)
 
 # Mengukur waktu eksekusi
-end_time = time.time()
-execution_time = end_time - start_time
+waktu_selesai = time.time()
+waktu_eksekusi = waktu_selesai - waktu_mulai
 
 # Harga bahan bakar dan efisiensi kendaraan
-fuel_price_per_liter = 10000  # contoh harga bahan bakar (Rp per liter)
-fuel_efficiency = 12  # contoh efisiensi bahan bakar (km per liter)
+harga_bahan_bakar_per_liter = 10000  # contoh harga bahan bakar (Rp per liter)
+efisiensi_bahan_bakar = 12  # contoh efisiensi bahan bakar (km per liter)
 
 # Menghitung biaya bahan bakar
-total_fuel_cost = calculate_fuel_cost(min_distance, fuel_price_per_liter, fuel_efficiency)
+total_biaya_bahan_bakar = hitung_biaya_bahan_bakar(jarak_terpendek, harga_bahan_bakar_per_liter, efisiensi_bahan_bakar)
 
 # Ekstraksi nama kota dari koordinat
-cities = {
+kota = {
     0: "Lembang",
     1: "Bandung",
     2: "Cimahi",
@@ -120,15 +120,15 @@ cities = {
 }
 
 # Tambahkan kembali titik awal ke rute terpendek
-best_route = best_route + [best_route[0]]
+rute_terbaik = rute_terbaik + [rute_terbaik[0]]
 
 # Ubah angka menjadi nama kota
-best_route_named = [cities[i] for i in best_route]
+rute_terbaik_bernama = [kota[i] for i in rute_terbaik]
 
-print(f"Rute terbaik: {best_route_named}")
-print(f"Jarak terpendek: {min_distance} km")
-print(f"Biaya bahan bakar: Rp {total_fuel_cost}")
-print(f"Waktu eksekusi: {execution_time} detik")
+print(f"Rute terbaik: {rute_terbaik_bernama}")
+print(f"Jarak terpendek: {jarak_terpendek} km")
+print(f"Biaya bahan bakar: Rp {total_biaya_bahan_bakar}")
+print(f"Waktu eksekusi: {waktu_eksekusi} detik")
 
 # Visualisasikan rute terbaik
-plot_route(best_route, cities, coordinates)
+plot_rute(rute_terbaik, kota, koordinat)
