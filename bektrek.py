@@ -1,4 +1,3 @@
-import itertools
 import matplotlib.pyplot as plt
 import time
 
@@ -43,6 +42,19 @@ def plot_route(route, cities, coordinates):
     plt.plot(x_coords, y_coords, marker='o')
     for i, city in enumerate(route_cities):
         plt.text(x_coords[i], y_coords[i], city)
+
+    # Tambahkan panah untuk menunjukkan arah rute
+    for i in range(len(route_cities) - 1):
+        plt.annotate(
+            '', xy=(x_coords[i+1], y_coords[i+1]), xytext=(x_coords[i], y_coords[i]),
+            arrowprops=dict(facecolor='blue', shrink=0.05)
+        )
+    # Tambahkan panah dari kota terakhir kembali ke kota asal
+    plt.annotate(
+        '', xy=(x_coords[0], y_coords[0]), xytext=(x_coords[-1], y_coords[-1]),
+        arrowprops=dict(facecolor='blue', shrink=0.05)
+    )
+
     plt.xlabel('Koordinat X')
     plt.ylabel('Koordinat Y')
     plt.title('Rute Terbaik untuk Distribusi Barang')
@@ -53,17 +65,17 @@ def plot_route(route, cities, coordinates):
 def calculate_fuel_cost(distance, fuel_price_per_liter, fuel_efficiency):
     return (distance / fuel_efficiency) * fuel_price_per_liter
 
-# Data contoh untuk jarak antar kota di sekitar Bandung (distance matrix)
+# Data jarak antar kota di sekitar Bandung berdasarkan Google Map (distance matrix)
 distance_matrix = [
     #   Lembang, Bandung, Cimahi, Sumedang, Soreang, Banjaran, Cileunyi, Majalaya
-    [0, 13, 11, 39, 29, 32, 27, 35],    # Lembang
-    [13, 0, 10, 32, 18, 22, 15, 25],    # Bandung
-    [11, 10, 0, 38, 18, 21, 17, 27],    # Cimahi
-    [39, 32, 38, 0, 50, 50, 23, 30],    # Sumedang
-    [29, 18, 18, 50, 0, 15, 30, 25],    # Soreang
-    [32, 22, 21, 50, 15, 0, 35, 28],    # Banjaran
-    [27, 15, 17, 23, 30, 35, 0, 10],    # Cileunyi
-    [35, 25, 27, 30, 25, 28, 10, 0]     # Majalaya
+    [0, 14, 20, 56, 32, 32, 27, 42],    # Lembang
+    [14, 0, 13, 46, 18, 20, 18, 26],    # Bandung
+    [20, 13, 0, 58, 22, 28, 30, 35],    # Cimahi
+    [56, 46, 58, 0, 60, 57, 31, 40],    # Sumedang
+    [32, 18, 22, 60, 0, 8, 31, 31],     # Soreang
+    [32, 20, 28, 57, 8, 0, 28, 23],     # Banjaran
+    [27, 18, 30, 31, 31, 28, 0, 19],    # Cileunyi
+    [42, 26, 35, 40, 31, 23, 19, 0]     # Majalaya
 ]
 
 # Koordinat kota untuk visualisasi (acak untuk tujuan plotting)
